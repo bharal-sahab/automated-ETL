@@ -1,0 +1,12 @@
+---
+description: FastAPI + Supabase ingestion pipeline coding standards
+alwaysApply: true
+---
+
+# Pipeline standards
+
+- Async I/O everywhere (`async def`, `httpx.AsyncClient`).
+- Pydantic v2 models at boundaries; no raw dicts across layers.
+- Folders: `api/`, `core/`, `db/`, `services/`, `tests/`.
+- Typed errors from `core/errors.py` with app-level handlers.
+- No placeholders in production code. Mock Supabase and JSONPlaceholder in tests.

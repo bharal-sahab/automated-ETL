@@ -1,0 +1,43 @@
+# FastAPI + SQLite (SQLModel) ingestion pipeline
+
+Always apply these rules when changing this repository.
+
+## Async Python
+
+- Use `async def` for all I/O (HTTP, SQLite, FastAPI routes, scheduler).
+- Do not add blocking I/O in the event loop. If a client is sync-only, wrap with `asyncio.to_thread`.
+- Prefer `httpx.AsyncClient` for outbound HTTP.
+- Use SQLModel via `DatabaseClient` in `db/client.py` (local `pipeline.db`).
+
+## Pydantic / SQLModel
+
+- Pydantic v2 only: `model_config`, `Field`, `ValidationError`.
+- Strict models at API/external boundaries (`JsonPlaceholderPost`, insert DTOs).
+- Tables live as SQLModel classes `RawIngestion` and `ProcessedMetrics` in `db/models.py`.
+- No untyped `dict` leaking across service/DB/API layers. Parse into models first.
+- Settings live in `core/config.py` via `pydantic-settings.BaseSettings`.
+
+## Layout
+
+Keep modules in:
+
+- `api/` — HTTP routes and response wiring
+- `core/` — config, errors, scheduler
+- `db/` — SQLite client, SQLModel tables, Pydantic API models
+- `services/` — ingestion, processor, pipeline orchestrator
+- `tests/` — pytest + pytest-asyncio
+
+Do not dump business logic into `main.py`. Do not add Supabase or any external database.
+
+## Errors
+
+- Raise typed exceptions from `core/errors.py` (`AppError` subclasses).
+- Register handlers on the FastAPI app; routes should not catch-and-return ad-hoc JSON for those errors.
+- Log failures with `logging` (no bare `print` for errors).
+
+## Quality
+
+- No placeholders, TODOs, or `pass`-only production stubs.
+- Type hints on public functions.
+- Tests must use in-memory SQLite (`sqlite:///:memory:`) and mock the external posts API (HTTPX).
+- Never write test data into the local `pipeline.db` file.
