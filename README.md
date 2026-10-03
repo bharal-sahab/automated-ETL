@@ -83,6 +83,28 @@ SOURCE_TEXT_FIELD=body
 
 Use a placeholder token in `.env`; do not commit real secrets. JSONPlaceholder (`SOURCE_NAME=jsonplaceholder`) still expects a **root array** — do not set `SOURCE_ITEMS_PATH` for that source.
 
+### Paginated `http_json`
+
+Set **either** `SOURCE_NEXT_FIELD` **or** `SOURCE_PAGE_PARAM` — not both. Link-based pagination needs an object response, so `SOURCE_NEXT_FIELD` also requires `SOURCE_ITEMS_PATH`. Page-number pagination works on a root array or on a list at `SOURCE_ITEMS_PATH`.
+
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| `SOURCE_NEXT_FIELD` | *(empty)* | Dotted path to the next page URL on each JSON object (e.g. `next` or `links.next`). Missing, null, or blank stops pagination. Requires `SOURCE_ITEMS_PATH`. A non-string next value is rejected. The same `SOURCE_AUTH_*` header is sent on every page. |
+| `SOURCE_PAGE_PARAM` | *(empty)* | Query parameter name (e.g. `page`). The client starts at `1` and stops when a page returns an empty item list. Works with a root array or `SOURCE_ITEMS_PATH`. |
+| `SOURCE_MAX_PAGES` | `10` | Maximum HTTP GETs per fetch; exceeding it is an error. A repeated next URL is also an error. |
+
+JSONPlaceholder is unchanged (one request). `http_json` with both pagination settings empty is still a single GET. All pages are ingested in one pipeline run; duplicate ids across pages are rejected.
+
+Example (link-based next page):
+
+```env
+SOURCE_NAME=http_json
+SOURCE_ITEMS_PATH=data
+SOURCE_NEXT_FIELD=next
+SOURCE_ID_FIELD=id
+SOURCE_TEXT_FIELD=body
+```
+
 ### Processors
 
 Set `PROCESSOR_NAME` in `.env` (default `word_count`).
@@ -140,6 +162,9 @@ fetch (plugin) → raw_ingestion → process (plugin) → processed_metrics
 | `SOURCE_AUTH_HEADER` | `Authorization` | Header name when `SOURCE_AUTH_TOKEN` is set |
 | `SOURCE_AUTH_TOKEN` | *(empty)* | Sent verbatim as that header (e.g. `Bearer your-token`) |
 | `SOURCE_ITEMS_PATH` | *(empty)* | Dotted path to the list on the JSON object for `http_json` |
+| `SOURCE_NEXT_FIELD` | *(empty)* | Dotted path to the next page URL on each JSON object for `http_json`; requires `SOURCE_ITEMS_PATH`; do not set with `SOURCE_PAGE_PARAM` |
+| `SOURCE_PAGE_PARAM` | *(empty)* | Query parameter for page-number pagination (starts at 1); root array or `SOURCE_ITEMS_PATH`; do not set with `SOURCE_NEXT_FIELD` |
+| `SOURCE_MAX_PAGES` | `10` | Maximum GETs per `http_json` fetch (error if exceeded) |
 | `INGESTION_INTERVAL_SECONDS` | `300` | Scheduler period |
 | `SCHEDULER_ENABLED` | `true` | Run ingest on an interval |
 | `HTTP_TIMEOUT_SECONDS` | `30` | Outbound HTTP timeout |

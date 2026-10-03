@@ -40,7 +40,7 @@ Keep scoring in `services/processor.py` (or a new module), then add the name to 
 
 ## Environment and issues
 
-Optional source settings (`SOURCE_AUTH_HEADER`, `SOURCE_AUTH_TOKEN`, `SOURCE_ITEMS_PATH`, `SOURCE_VALUE_FIELD` for `numeric`) are documented in [`.env.example`](.env.example) and the README. Use the [bug report](.github/ISSUE_TEMPLATE/bug_report.md) or [feature request](.github/ISSUE_TEMPLATE/feature_request.md) templates when opening issues, and the [pull request template](.github/pull_request_template.md) when you submit a PR.
+Optional source settings (`SOURCE_AUTH_HEADER`, `SOURCE_AUTH_TOKEN`, `SOURCE_ITEMS_PATH`, `SOURCE_NEXT_FIELD` / `SOURCE_PAGE_PARAM` / `SOURCE_MAX_PAGES` for paginated `http_json`, `SOURCE_VALUE_FIELD` for `numeric`) are documented in [`.env.example`](.env.example) and the README. Use only one of `SOURCE_NEXT_FIELD` or `SOURCE_PAGE_PARAM` when paginating. Use the [bug report](.github/ISSUE_TEMPLATE/bug_report.md) or [feature request](.github/ISSUE_TEMPLATE/feature_request.md) templates when opening issues, and the [pull request template](.github/pull_request_template.md) when you submit a PR.
 
 ## Pull requests
 
