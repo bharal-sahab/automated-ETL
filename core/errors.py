@@ -56,6 +56,13 @@ class PipelineBusyError(AppError):
         super().__init__(message, status_code=409)
 
 
+class ConfigurationError(AppError):
+    """Invalid source/processor name or plugin settings."""
+
+    def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, status_code=400, details=details)
+
+
 def _error_body(message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
     body: dict[str, Any] = {"error": message}
     if details:

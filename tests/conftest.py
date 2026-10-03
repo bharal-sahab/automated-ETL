@@ -23,7 +23,12 @@ SAMPLE_POSTS: list[dict[str, Any]] = [
 def test_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
     monkeypatch.setenv("INGESTION_INTERVAL_SECONDS", "300")
+    monkeypatch.setenv("SOURCE_NAME", "jsonplaceholder")
+    monkeypatch.setenv("PROCESSOR_NAME", "word_count")
+    monkeypatch.setenv("SOURCE_URL", "https://jsonplaceholder.typicode.com/posts")
     monkeypatch.setenv("MOCK_API_URL", "https://jsonplaceholder.typicode.com/posts")
+    monkeypatch.setenv("SOURCE_ID_FIELD", "id")
+    monkeypatch.setenv("SOURCE_TEXT_FIELD", "body")
     monkeypatch.setenv("SCHEDULER_ENABLED", "false")
     monkeypatch.setenv("HTTP_TIMEOUT_SECONDS", "5")
     clear_settings_cache()
@@ -55,3 +60,13 @@ async def db(settings: Settings) -> AsyncIterator[DatabaseClient]:
         yield client
     finally:
         await client.close()
+
+
+def pipeline_db_fingerprint() -> tuple[bool, int | None]:
+    """(exists, mtime_ns) for the on-disk pipeline.db next to the repo root."""
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "pipeline.db"
+    if not path.exists():
+        return False, None
+    return True, path.stat().st_mtime_ns

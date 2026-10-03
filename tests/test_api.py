@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import httpx
 import pytest
 import respx
@@ -15,10 +13,9 @@ from core.scheduler import PipelineScheduler
 from db.client import DatabaseClient
 from main import create_app
 from services.pipeline import PipelineOrchestrator
-from tests.conftest import SAMPLE_POSTS
+from tests.conftest import SAMPLE_POSTS, pipeline_db_fingerprint
 
 POSTS_URL = "https://jsonplaceholder.typicode.com/posts"
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture
@@ -41,6 +38,19 @@ def test_health(client: TestClient) -> None:
     assert body["status"] == "ok"
     assert body["scheduler_enabled"] is False
     assert body["scheduler_running"] is False
+    assert body["source"] == "jsonplaceholder"
+    assert body["processor"] == "word_count"
+
+
+def test_root_lists_plugins(client: TestClient) -> None:
+    response = client.get("/")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "automated-ETL"
+    assert "jsonplaceholder" in body["sources"]
+    assert "http_json" in body["sources"]
+    assert "word_count" in body["processors"]
+    assert body["docs"] == "/docs"
 
 
 @respx.mock
@@ -112,10 +122,11 @@ def test_pipeline_busy_returns_409(app) -> None:
 
 @respx.mock
 def test_api_does_not_create_pipeline_db(client: TestClient) -> None:
+    before = pipeline_db_fingerprint()
     respx.get(POSTS_URL).mock(return_value=httpx.Response(200, json=SAMPLE_POSTS))
     response = client.post("/pipeline/run")
     assert response.status_code == 200
-    assert not (REPO_ROOT / "pipeline.db").exists()
+    assert pipeline_db_fingerprint() == before
 
 
 def test_lifespan_uses_in_memory_client(client: TestClient, app) -> None:

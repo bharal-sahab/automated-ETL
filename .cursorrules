@@ -24,7 +24,7 @@ Keep modules in:
 - `api/` — HTTP routes and response wiring
 - `core/` — config, errors, scheduler
 - `db/` — SQLite client, SQLModel tables, Pydantic API models
-- `services/` — ingestion, processor, pipeline orchestrator
+- `services/` — ingestion, processor, pipeline, plugin registry, `services/sources/`
 - `tests/` — pytest + pytest-asyncio
 
 Do not dump business logic into `main.py`. Do not add Supabase or any external database.
