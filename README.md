@@ -126,6 +126,19 @@ SOURCE_ID_FIELD=id
 SOURCE_TEXT_FIELD=body
 ```
 
+### Local JSON file
+
+`file_json` is a built-in example of a source that does not call HTTP. Copy [`services/sources/file_json.py`](services/sources/file_json.py) when you need your own plugin. The sample file is a root array of objects:
+
+```env
+SOURCE_NAME=file_json
+SOURCE_FILE=examples/records.json
+SOURCE_ID_FIELD=id
+SOURCE_TEXT_FIELD=body
+```
+
+`SOURCE_ID_FIELD` and `SOURCE_TEXT_FIELD` use the same dotted paths as `http_json`. A missing path, invalid JSON, a non-array root, or a duplicate id fails the run.
+
 ### Processors
 
 Set `PROCESSOR_NAME` in `.env` (default `word_count`).
@@ -156,7 +169,8 @@ Then `POST /pipeline/run`. Scheduler: `SCHEDULER_ENABLED=true`, `INGESTION_INTER
 | You want to… | Do this |
 | --- | --- |
 | Hit a JSON array API | `SOURCE_NAME=http_json` + field env vars |
-| Validate a custom payload | New class in `services/sources/`, register in `services/registry.py` |
+| Score a local JSON file | `SOURCE_NAME=file_json` and `SOURCE_FILE` (see Local JSON file) |
+| Validate a custom payload | Copy `services/sources/file_json.py`, register in `services/registry.py` |
 | Change scoring / anomalies | `services/processor.py`, register in `services/registry.py`, set `PROCESSOR_NAME` |
 | Change schedule / lock | `core/scheduler.py`, `services/pipeline.py` |
 | Change storage | `db/models.py`, `db/client.py` |
@@ -174,7 +188,8 @@ fetch (plugin) → raw_ingestion → process (plugin) → processed_metrics
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `DATABASE_URL` | `sqlite:///./pipeline.db` | SQLAlchemy URL |
-| `SOURCE_NAME` | `jsonplaceholder` | `jsonplaceholder` or `http_json` |
+| `SOURCE_NAME` | `jsonplaceholder` | `jsonplaceholder`, `http_json`, or `file_json` |
+| `SOURCE_FILE` | *(empty)* | Path to a JSON array when `SOURCE_NAME=file_json` |
 | `PROCESSOR_NAME` | `word_count` | `word_count` or `numeric` |
 | `SOURCE_URL` | JSONPlaceholder posts | HTTP JSON endpoint (`MOCK_API_URL` still works) |
 | `SOURCE_ID_FIELD` | `id` | Id path for `http_json` (stored as text) |

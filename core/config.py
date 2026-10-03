@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     ingestion_interval_seconds: int = Field(default=300, ge=1)
     source_name: str = Field(
         default="jsonplaceholder",
-        description="Registered data source: jsonplaceholder or http_json.",
+        description="Registered data source: jsonplaceholder, http_json, or file_json.",
     )
     processor_name: str = Field(
         default="word_count",
@@ -81,6 +81,13 @@ class Settings(BaseSettings):
         default="Authorization",
         min_length=1,
         description="HTTP header name for SOURCE_AUTH_TOKEN when set.",
+    )
+    source_file: str = Field(
+        default="",
+        description=(
+            "Path to a JSON array file when SOURCE_NAME=file_json. "
+            "See examples/records.json."
+        ),
     )
     source_auth_token: str = Field(
         default="",

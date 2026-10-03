@@ -15,7 +15,7 @@ Working memory for the FastAPI + SQLite (SQLModel) ingestion pipeline.
 
 ## Architecture notes
 
-- Plugins: `SOURCE_NAME=jsonplaceholder|http_json`, `PROCESSOR_NAME=word_count`.
+- Plugins: `SOURCE_NAME=jsonplaceholder|http_json|file_json`, `PROCESSOR_NAME=word_count|numeric`.
 - Generic JSON arrays: `http_json` + `SOURCE_ID_FIELD` / `SOURCE_TEXT_FIELD` (dotted paths).
 - Custom sources: `services/sources/` + `register_source` / `SOURCE_FACTORIES`.
 - Tests: `sqlite:///:memory:`; HTTP mocked with respx.
