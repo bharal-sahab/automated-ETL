@@ -169,7 +169,7 @@ Then `POST /pipeline/run`. Scheduler: `SCHEDULER_ENABLED=true`, `INGESTION_INTER
 | You want to… | Do this |
 | --- | --- |
 | Hit a JSON array API | `SOURCE_NAME=http_json` + field env vars |
-| Score a local JSON file | `SOURCE_NAME=file_json` and `SOURCE_FILE` (see below) |
+| Score a local JSON file | `SOURCE_NAME=file_json` and `SOURCE_FILE` (see Local JSON file) |
 | Validate a custom payload | Copy `services/sources/file_json.py`, register in `services/registry.py` |
 | Change scoring / anomalies | `services/processor.py`, register in `services/registry.py`, set `PROCESSOR_NAME` |
 | Change schedule / lock | `core/scheduler.py`, `services/pipeline.py` |
