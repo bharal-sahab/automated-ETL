@@ -45,6 +45,22 @@ class Settings(BaseSettings):
         min_length=1,
         description="Object key (dotted path ok) used as text for SOURCE_NAME=http_json.",
     )
+    source_items_path: str = Field(
+        default="",
+        description=(
+            "Dotted path on the JSON root object to the array of records "
+            "(SOURCE_NAME=http_json). Empty means the root must be an array."
+        ),
+    )
+    source_auth_header: str = Field(
+        default="Authorization",
+        min_length=1,
+        description="HTTP header name for SOURCE_AUTH_TOKEN when set.",
+    )
+    source_auth_token: str = Field(
+        default="",
+        description="Value for SOURCE_AUTH_HEADER. Empty means no auth header is sent.",
+    )
     scheduler_enabled: bool = Field(default=True)
     http_timeout_seconds: float = Field(default=30.0, gt=0)
 

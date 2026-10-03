@@ -7,7 +7,7 @@ from pydantic import TypeAdapter, ValidationError
 from core.config import Settings
 from core.errors import PayloadValidationError
 from db.models import IngestedItem, JsonPlaceholderPost
-from services.http_fetch import fetch_json
+from services.http_fetch import auth_headers, fetch_json
 
 _POSTS_ADAPTER = TypeAdapter(list[JsonPlaceholderPost])
 
@@ -16,9 +16,10 @@ async def fetch_posts(
     *,
     url: str,
     timeout_seconds: float,
+    headers: dict[str, str] | None = None,
 ) -> list[JsonPlaceholderPost]:
     """GET posts and validate the JSONPlaceholder shape."""
-    payload = await fetch_json(url=url, timeout_seconds=timeout_seconds)
+    payload = await fetch_json(url=url, timeout_seconds=timeout_seconds, headers=headers)
     if not isinstance(payload, list):
         raise PayloadValidationError(
             "Posts API payload must be a JSON array",
@@ -46,6 +47,7 @@ class JsonPlaceholderSource:
         posts = await fetch_posts(
             url=self.origin,
             timeout_seconds=self._settings.http_timeout_seconds,
+            headers=auth_headers(self._settings),
         )
         return [
             IngestedItem(id=post.id, body=post.body, payload=post.model_dump(by_alias=True))

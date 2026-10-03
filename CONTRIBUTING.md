@@ -36,6 +36,10 @@ For many public APIs you do not need a new class: set `SOURCE_NAME=http_json` an
 
 Keep scoring in `services/processor.py` (or a new module), then add the name to `PROCESSORS` in `services/registry.py` and branch in `services/pipeline.py`. Cover the rule with unit tests.
 
+## Environment and issues
+
+Optional source settings (`SOURCE_AUTH_HEADER`, `SOURCE_AUTH_TOKEN`, `SOURCE_ITEMS_PATH`) are documented in [`.env.example`](.env.example) and the README. Use the [bug report](.github/ISSUE_TEMPLATE/bug_report.md) or [feature request](.github/ISSUE_TEMPLATE/feature_request.md) templates when opening issues, and the [pull request template](.github/pull_request_template.md) when you submit a PR.
+
 ## Pull requests
 
 - No secrets (`.env`, keys, `pipeline.db`).

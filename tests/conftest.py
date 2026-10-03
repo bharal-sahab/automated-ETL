@@ -31,6 +31,9 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SOURCE_TEXT_FIELD", "body")
     monkeypatch.setenv("SCHEDULER_ENABLED", "false")
     monkeypatch.setenv("HTTP_TIMEOUT_SECONDS", "5")
+    monkeypatch.setenv("SOURCE_AUTH_HEADER", "Authorization")
+    monkeypatch.setenv("SOURCE_AUTH_TOKEN", "")
+    monkeypatch.setenv("SOURCE_ITEMS_PATH", "")
     clear_settings_cache()
     yield
     clear_settings_cache()

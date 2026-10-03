@@ -7,7 +7,7 @@ from typing import Any
 from core.config import Settings
 from core.errors import PayloadValidationError
 from db.models import IngestedItem
-from services.http_fetch import fetch_json
+from services.http_fetch import auth_headers, fetch_json
 
 
 def dig(obj: dict[str, Any], path: str) -> Any:
@@ -70,8 +70,29 @@ class HttpJsonSource:
         payload = await fetch_json(
             url=self.origin,
             timeout_seconds=self._settings.http_timeout_seconds,
+            headers=auth_headers(self._settings),
         )
-        if not isinstance(payload, list):
+        items_path = self._settings.source_items_path.strip()
+        if items_path:
+            if not isinstance(payload, dict):
+                raise PayloadValidationError(
+                    "Source payload must be a JSON object when SOURCE_ITEMS_PATH is set",
+                    details={"received_type": type(payload).__name__, "path": items_path},
+                )
+            try:
+                records = dig(payload, items_path)
+            except PayloadValidationError as exc:
+                raise PayloadValidationError(
+                    "Source payload is missing configured items path",
+                    details={"path": items_path, **(exc.details or {})},
+                ) from exc
+            if not isinstance(records, list):
+                raise PayloadValidationError(
+                    "Configured items path must resolve to a JSON array",
+                    details={"path": items_path, "received_type": type(records).__name__},
+                )
+            payload = records
+        elif not isinstance(payload, list):
             raise PayloadValidationError(
                 "Source payload must be a JSON array",
                 details={"received_type": type(payload).__name__},
