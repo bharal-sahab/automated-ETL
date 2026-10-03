@@ -15,10 +15,12 @@ git clone https://github.com/bharal-sahab/automated-ETL.git
 cd automated-ETL
 python3.11 -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
 cp .env.example .env
 uvicorn main:app --reload
 ```
+
+`pip install -r requirements.txt` installs the same pins. The editable install is what CI uses.
 
 Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
@@ -36,6 +38,25 @@ pytest tests -v
 ```
 
 Tests use in-memory SQLite and mock outbound HTTP. They never write `pipeline.db`.
+
+## Run with Docker
+
+```bash
+docker build -t automated-etl .
+docker run --rm -p 8000:8000 automated-etl
+```
+
+The image listens on port 8000 and stores SQLite at `/data/pipeline.db` (a Docker volume). Pass your own env file when you change the source. If that file sets `DATABASE_URL=sqlite:///./pipeline.db`, also mount a writable directory or override the URL so the file survives the container:
+
+```bash
+cp .env.example .env
+docker run --rm -p 8000:8000 --env-file .env \
+  -e DATABASE_URL=sqlite:////data/pipeline.db \
+  -v automated-etl-data:/data \
+  automated-etl
+```
+
+Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs). The default source still calls JSONPlaceholder, so the container needs outbound network access.
 
 **Upgrading:** If you already have a `pipeline.db` from before record ids became text, delete that file once so SQLite can recreate tables with `post_id` as text. The test suite does not use your local `pipeline.db`.
 

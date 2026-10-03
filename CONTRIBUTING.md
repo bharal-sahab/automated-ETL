@@ -7,10 +7,12 @@ Thanks for forking [automated-ETL](https://github.com/bharal-sahab/automated-ETL
 ```bash
 python3.11 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
 cp .env.example .env
 pytest tests -v
 ```
+
+Dependencies live in [`pyproject.toml`](pyproject.toml). `requirements.txt` lists the same pins. To run the API in a container, see the Docker section in the README.
 
 ## Add a data source
 
