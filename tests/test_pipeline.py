@@ -31,7 +31,7 @@ async def test_pipeline_run_fetches_processes_persists(
     assert result.source == POSTS_URL
     items, total = await db.fetch_processed_metrics(limit=10, offset=0)
     assert total == 3
-    assert {row.post_id for row in items} == {1, 2, 3}
+    assert {row.post_id for row in items} == {"1", "2", "3"}
 
 
 @pytest.mark.asyncio

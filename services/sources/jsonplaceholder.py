@@ -50,6 +50,10 @@ class JsonPlaceholderSource:
             headers=auth_headers(self._settings),
         )
         return [
-            IngestedItem(id=post.id, body=post.body, payload=post.model_dump(by_alias=True))
+            IngestedItem(
+                id=str(post.id),
+                body=post.body,
+                payload=post.model_dump(by_alias=True),
+            )
             for post in posts
         ]

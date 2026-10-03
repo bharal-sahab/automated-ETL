@@ -65,7 +65,7 @@ def test_processed_metrics_rejects_negative_word_count() -> None:
         ProcessedMetrics.model_validate(
             {
                 "run_id": RawIngestion.model_validate({"source": "x", "payload": []}).id,
-                "post_id": 1,
+                "post_id": "1",
                 "word_count": -1,
                 "average_word_count": 0.0,
             }

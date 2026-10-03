@@ -27,14 +27,35 @@ class JsonPlaceholderPost(BaseModel):
     body: str
 
 
+def _strip_non_empty_optional(value: str | None) -> str | None:
+    if value is None:
+        return None
+    stripped = value.strip()
+    if not stripped:
+        raise ValueError("post_id must not be blank")
+    return stripped
+
+
+def _strip_non_empty_id(value: str) -> str:
+    stripped = value.strip()
+    if not stripped:
+        raise ValueError("id must not be blank")
+    return stripped
+
+
 class IngestedItem(BaseModel):
     """Normalized record produced by every data source."""
 
     model_config = ConfigDict(strict=True, extra="forbid")
 
-    id: int = Field(ge=1)
+    id: str = Field(min_length=1)
     body: str
     payload: dict[str, Any]
+
+    @field_validator("id")
+    @classmethod
+    def id_non_empty(cls, value: str) -> str:
+        return _strip_non_empty_id(value)
 
 
 class RawIngestionInsert(BaseModel):
@@ -60,9 +81,14 @@ class ProcessedMetricInsert(BaseModel):
     model_config = ConfigDict(strict=True, extra="forbid")
 
     run_id: UUID
-    post_id: int | None = Field(default=None, ge=1)
+    post_id: str | None = Field(default=None)
+
+    @field_validator("post_id")
+    @classmethod
+    def post_id_non_empty(cls, value: str | None) -> str | None:
+        return _strip_non_empty_optional(value)
     word_count: int = Field(ge=0)
-    average_word_count: float = Field(ge=0)
+    average_word_count: float
     is_anomaly: bool = False
 
 
@@ -106,9 +132,9 @@ class ProcessedMetrics(SQLModel, table=True):
 
     id: UUID = SQLField(default_factory=uuid4, primary_key=True)
     run_id: UUID = SQLField(foreign_key="raw_ingestion.id", nullable=False, index=True)
-    post_id: int | None = SQLField(default=None, ge=1)
+    post_id: str | None = SQLField(default=None, sa_column=Column(Text, nullable=True))
     word_count: int = SQLField(ge=0, nullable=False)
-    average_word_count: float = SQLField(ge=0, nullable=False)
+    average_word_count: float = SQLField(nullable=False)
     is_anomaly: bool = SQLField(default=False, nullable=False)
     processed_at: datetime = SQLField(default_factory=utc_now, nullable=False, index=True)
 
@@ -119,19 +145,10 @@ class ProcessedMetrics(SQLModel, table=True):
             raise ValueError("word_count must be >= 0")
         return value
 
-    @field_validator("average_word_count")
-    @classmethod
-    def average_non_negative(cls, value: float) -> float:
-        if value < 0:
-            raise ValueError("average_word_count must be >= 0")
-        return value
-
     @field_validator("post_id")
     @classmethod
-    def post_id_positive(cls, value: int | None) -> int | None:
-        if value is not None and value < 1:
-            raise ValueError("post_id must be >= 1")
-        return value
+    def post_id_non_empty(cls, value: str | None) -> str | None:
+        return _strip_non_empty_optional(value)
 
 
 class PipelineRunResponse(BaseModel):

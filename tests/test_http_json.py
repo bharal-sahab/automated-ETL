@@ -41,7 +41,7 @@ async def test_http_json_maps_dotted_fields(http_json_settings: Settings) -> Non
     )
     source = HttpJsonSource(http_json_settings)
     items = await source.fetch()
-    assert [item.id for item in items] == [10, 11]
+    assert [item.id for item in items] == ["10", "11"]
     assert items[0].body == "alpha beta"
     assert items[0].payload["event"]["id"] == 10
 
@@ -59,7 +59,7 @@ async def test_http_json_ingest_persists(
     )
     result = await ingest_posts(db, http_json_settings)
     assert len(result.posts) == 1
-    assert result.posts[0].id == 1
+    assert result.posts[0].id == "1"
     assert result.record.source == CUSTOM_URL
     stored = await db.get_raw_ingestion(result.record.id)
     assert stored is not None

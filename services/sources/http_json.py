@@ -23,23 +23,31 @@ def dig(obj: dict[str, Any], path: str) -> Any:
     return current
 
 
-def as_item_id(value: Any, *, path: str) -> int:
+def as_item_id(value: Any, *, path: str) -> str:
     if isinstance(value, bool) or isinstance(value, float):
         raise PayloadValidationError(
-            "Record id must be an integer",
+            "Record id must be a non-empty string",
             details={"path": path, "received_type": type(value).__name__},
         )
     if isinstance(value, int):
         if value < 1:
             raise PayloadValidationError("Record id must be >= 1", details={"path": path})
-        return value
-    if isinstance(value, str) and value.isdigit():
-        parsed = int(value)
-        if parsed < 1:
-            raise PayloadValidationError("Record id must be >= 1", details={"path": path})
-        return parsed
+        return str(value)
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            raise PayloadValidationError(
+                "Record id must be a non-empty string",
+                details={"path": path},
+            )
+        if stripped.isdigit():
+            parsed = int(stripped)
+            if parsed < 1:
+                raise PayloadValidationError("Record id must be >= 1", details={"path": path})
+            return str(parsed)
+        return stripped
     raise PayloadValidationError(
-        "Record id must be an integer",
+        "Record id must be a non-empty string",
         details={"path": path, "received_type": type(value).__name__},
     )
 

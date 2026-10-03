@@ -43,7 +43,7 @@ async def test_insert_processed_metrics(db: DatabaseClient) -> None:
         [
             ProcessedMetricInsert(
                 run_id=raw.id,
-                post_id=1,
+                post_id="1",
                 word_count=3,
                 average_word_count=3.0,
                 is_anomaly=False,
@@ -51,7 +51,7 @@ async def test_insert_processed_metrics(db: DatabaseClient) -> None:
         ]
     )
     assert len(rows) == 1
-    assert rows[0].post_id == 1
+    assert rows[0].post_id == "1"
     by_run = await db.fetch_processed_metrics_by_run(raw.id)
     assert len(by_run) == 1
     assert by_run[0].word_count == 3
@@ -69,7 +69,7 @@ async def test_insert_metrics_without_parent_raises(db: DatabaseClient) -> None:
             [
                 ProcessedMetricInsert(
                     run_id=uuid4(),
-                    post_id=1,
+                    post_id="1",
                     word_count=1,
                     average_word_count=1.0,
                     is_anomaly=False,
@@ -84,7 +84,7 @@ async def test_fetch_processed_metrics_pagination(db: DatabaseClient) -> None:
     inserts = [
         ProcessedMetricInsert(
             run_id=raw.id,
-            post_id=i,
+            post_id=str(i),
             word_count=i,
             average_word_count=2.0,
             is_anomaly=False,
@@ -145,7 +145,7 @@ def test_metric_insert_rejects_negative_word_count() -> None:
     with pytest.raises(ValidationError):
         ProcessedMetricInsert(
             run_id=uuid4(),
-            post_id=1,
+            post_id="1",
             word_count=-1,
             average_word_count=0.0,
             is_anomaly=False,

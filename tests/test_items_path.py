@@ -40,7 +40,7 @@ async def test_source_items_path_data_unwraps_nested_list(
     source = HttpJsonSource(wrapped_list_settings)
     items = await source.fetch()
     assert len(items) == 1
-    assert items[0].id == 1
+    assert items[0].id == "1"
     assert items[0].body == "hello world"
 
 

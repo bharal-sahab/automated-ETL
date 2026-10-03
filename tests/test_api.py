@@ -95,7 +95,7 @@ def test_get_metrics_with_pagination(client: TestClient) -> None:
     assert body["limit"] == 2
     assert body["offset"] == 1
     assert len(body["items"]) == 2
-    assert {item["post_id"] for item in body["items"]} <= {1, 2, 3}
+    assert {item["post_id"] for item in body["items"]} <= {"1", "2", "3"}
 
 
 def test_metrics_rejects_bad_limit(client: TestClient) -> None:

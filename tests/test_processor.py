@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from db.models import JsonPlaceholderPost
+from db.models import IngestedItem
 from services.processor import (
     build_metric_inserts,
     count_words,
@@ -32,25 +32,16 @@ def test_is_anomaly_false_when_stddev_zero() -> None:
     assert is_anomaly(1, 5.0, 0.0) is False
 
 
+def _ingested(post_id: int, body: str) -> IngestedItem:
+    return IngestedItem(id=str(post_id), body=body, payload={"id": post_id, "body": body})
+
+
 def test_anomaly_flagging_one_stddev() -> None:
     posts = [
-        JsonPlaceholderPost.model_validate(
-            {"userId": 1, "id": 1, "title": "a", "body": "one"}
-        ),
-        JsonPlaceholderPost.model_validate(
-            {"userId": 1, "id": 2, "title": "b", "body": "one"}
-        ),
-        JsonPlaceholderPost.model_validate(
-            {"userId": 1, "id": 3, "title": "c", "body": "one"}
-        ),
-        JsonPlaceholderPost.model_validate(
-            {
-                "userId": 1,
-                "id": 4,
-                "title": "d",
-                "body": "one two three four five six seven eight nine ten",
-            }
-        ),
+        _ingested(1, "one"),
+        _ingested(2, "one"),
+        _ingested(3, "one"),
+        _ingested(4, "one two three four five six seven eight nine ten"),
     ]
     inserts, average, stddev = build_metric_inserts(posts, uuid4())
     assert average == 13 / 4
@@ -62,10 +53,7 @@ def test_anomaly_flagging_one_stddev() -> None:
 
 
 def test_no_anomalies_when_all_counts_equal() -> None:
-    posts = [
-        JsonPlaceholderPost.model_validate({"userId": 1, "id": i, "title": "t", "body": "one two"})
-        for i in range(1, 4)
-    ]
+    posts = [_ingested(i, "one two") for i in range(1, 4)]
     inserts, _average, stddev = build_metric_inserts(posts, uuid4())
     assert stddev == 0.0
     assert all(row.is_anomaly is False for row in inserts)
@@ -73,9 +61,7 @@ def test_no_anomalies_when_all_counts_equal() -> None:
 
 
 def test_single_post_is_not_an_anomaly() -> None:
-    posts = [
-        JsonPlaceholderPost.model_validate({"userId": 1, "id": 1, "title": "t", "body": "only one post body here"})
-    ]
+    posts = [_ingested(1, "only one post body here")]
     inserts, average, stddev = build_metric_inserts(posts, uuid4())
     assert stddev == 0.0
     assert inserts[0].is_anomaly is False
