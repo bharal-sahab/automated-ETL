@@ -59,9 +59,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     configure_logging()
     application = FastAPI(
-        title="Ingestion Pipeline",
-        description="JSONPlaceholder → SQLite raw ingest + word-count metrics",
-        version="1.0.0",
+        title="automated-ETL",
+        description="Pluggable HTTP JSON ingest → SQLite metrics. Default source: JSONPlaceholder.",
+        version="1.1.0",
         lifespan=lifespan,
     )
     register_exception_handlers(application)

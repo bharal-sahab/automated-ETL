@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import httpx
 import pytest
 import respx
@@ -12,10 +10,9 @@ from core.config import Settings
 from core.errors import IngestionError, PayloadValidationError
 from db.client import DatabaseClient
 from services.ingestion import fetch_posts, ingest_posts
-from tests.conftest import SAMPLE_POSTS
+from tests.conftest import SAMPLE_POSTS, pipeline_db_fingerprint
 
 POSTS_URL = "https://jsonplaceholder.typicode.com/posts"
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 @respx.mock
@@ -76,6 +73,7 @@ async def test_fetch_posts_non_array_payload() -> None:
 @respx.mock
 @pytest.mark.asyncio
 async def test_ingest_posts_persists_raw_payload(db: DatabaseClient, settings: Settings) -> None:
+    before = pipeline_db_fingerprint()
     respx.get(POSTS_URL).mock(return_value=httpx.Response(200, json=SAMPLE_POSTS))
     result = await ingest_posts(db, settings)
     assert len(result.posts) == 3
@@ -84,4 +82,4 @@ async def test_ingest_posts_persists_raw_payload(db: DatabaseClient, settings: S
     assert stored.source == POSTS_URL
     assert stored.payload[0]["userId"] == 1
     assert result.record.payload[0]["id"] == 1
-    assert not (REPO_ROOT / "pipeline.db").exists()
+    assert pipeline_db_fingerprint() == before

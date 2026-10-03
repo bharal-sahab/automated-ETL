@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import logging
 import math
+from collections.abc import Sequence
 from uuid import UUID
 
 from db.client import DatabaseClient
-from db.models import JsonPlaceholderPost, ProcessedMetricInsert, ProcessSummary
+from db.models import ProcessedMetricInsert, ProcessSummary
+from services.contracts import RecordLike
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ def is_anomaly(word_count: int, average: float, stddev: float) -> bool:
 
 
 def build_metric_inserts(
-    posts: list[JsonPlaceholderPost],
+    posts: Sequence[RecordLike],
     run_id: UUID,
 ) -> tuple[list[ProcessedMetricInsert], float, float]:
     """Compute word counts, run average, stddev, and anomaly flags."""
@@ -66,7 +68,7 @@ def build_metric_inserts(
 
 async def process_posts(
     db: DatabaseClient,
-    posts: list[JsonPlaceholderPost],
+    posts: Sequence[RecordLike],
     run_id: UUID,
 ) -> ProcessSummary:
     """Score posts and persist processed_metrics rows."""

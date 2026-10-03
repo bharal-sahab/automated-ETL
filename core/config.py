@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import Field, HttpUrl
+from pydantic import AliasChoices, Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
+        populate_by_name=True,
     )
 
     database_url: str = Field(
@@ -21,13 +22,40 @@ class Settings(BaseSettings):
         description="SQLAlchemy URL. Default is a local pipeline.db file. Tests use sqlite:///:memory:.",
     )
     ingestion_interval_seconds: int = Field(default=300, ge=1)
-    mock_api_url: HttpUrl = Field(default="https://jsonplaceholder.typicode.com/posts")
+    source_name: str = Field(
+        default="jsonplaceholder",
+        description="Registered data source: jsonplaceholder or http_json.",
+    )
+    processor_name: str = Field(
+        default="word_count",
+        description="Registered processor. Built-in: word_count.",
+    )
+    source_url: HttpUrl = Field(
+        default="https://jsonplaceholder.typicode.com/posts",
+        validation_alias=AliasChoices("SOURCE_URL", "MOCK_API_URL", "source_url"),
+        description="HTTP JSON endpoint. MOCK_API_URL is accepted as a legacy alias.",
+    )
+    source_id_field: str = Field(
+        default="id",
+        min_length=1,
+        description="Object key (dotted path ok) used as the record id for SOURCE_NAME=http_json.",
+    )
+    source_text_field: str = Field(
+        default="body",
+        min_length=1,
+        description="Object key (dotted path ok) used as text for SOURCE_NAME=http_json.",
+    )
     scheduler_enabled: bool = Field(default=True)
     http_timeout_seconds: float = Field(default=30.0, gt=0)
 
     @property
+    def source_url_str(self) -> str:
+        return str(self.source_url)
+
+    @property
     def mock_api_url_str(self) -> str:
-        return str(self.mock_api_url)
+        """Backward-compatible alias for source_url_str."""
+        return self.source_url_str
 
 
 @lru_cache

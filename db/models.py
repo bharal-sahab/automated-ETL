@@ -27,6 +27,16 @@ class JsonPlaceholderPost(BaseModel):
     body: str
 
 
+class IngestedItem(BaseModel):
+    """Normalized record produced by every data source."""
+
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    id: int = Field(ge=1)
+    body: str
+    payload: dict[str, Any]
+
+
 class RawIngestionInsert(BaseModel):
     """Validated payload for inserting a raw ingestion row."""
 
@@ -146,6 +156,19 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     scheduler_enabled: bool
     scheduler_running: bool
+    source: str | None = None
+    processor: str | None = None
+
+
+class RootResponse(BaseModel):
+    name: str
+    version: str
+    docs: str = "/docs"
+    health: str = "/health"
+    pipeline_run: str = "POST /pipeline/run"
+    metrics: str = "GET /metrics"
+    sources: list[str]
+    processors: list[str]
 
 
 class ProcessSummary(BaseModel):
@@ -161,4 +184,4 @@ class IngestionResult(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     record: RawIngestion
-    posts: list[JsonPlaceholderPost]
+    posts: list[IngestedItem]
