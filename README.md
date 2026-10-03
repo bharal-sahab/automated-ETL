@@ -59,7 +59,25 @@ SOURCE_TEXT_FIELD=body
 # SOURCE_TEXT_FIELD=message
 ```
 
+### Authenticated and wrapped JSON
+
+Bearer tokens and APIs that wrap the list in an object (not a root array) use optional env vars. `SOURCE_ID_FIELD` and `SOURCE_TEXT_FIELD` still apply to each element inside the list.
+
+```env
+SOURCE_NAME=http_json
+SOURCE_URL=https://your.api.example/v1/posts
+SOURCE_AUTH_HEADER=Authorization
+SOURCE_AUTH_TOKEN=Bearer your-token
+SOURCE_ITEMS_PATH=data
+SOURCE_ID_FIELD=id
+SOURCE_TEXT_FIELD=body
+```
+
+Use a placeholder token in `.env`; do not commit real secrets. JSONPlaceholder (`SOURCE_NAME=jsonplaceholder`) still expects a **root array** — do not set `SOURCE_ITEMS_PATH` for that source.
+
 Then `POST /pipeline/run`. Scheduler: `SCHEDULER_ENABLED=true`, `INGESTION_INTERVAL_SECONDS=300`.
+
+**Template repo:** To offer “Use this template” on GitHub, mark the repository as a template in **Settings → General**. Add topics such as `fastapi`, `etl`, `sqlite`, and `python` under **About** (repo owner, in the UI).
 
 ## Extend it in code
 
@@ -89,6 +107,9 @@ fetch (plugin) → raw_ingestion → process (plugin) → processed_metrics
 | `SOURCE_URL` | JSONPlaceholder posts | HTTP JSON endpoint (`MOCK_API_URL` still works) |
 | `SOURCE_ID_FIELD` | `id` | Id path for `http_json` |
 | `SOURCE_TEXT_FIELD` | `body` | Text path for `http_json` |
+| `SOURCE_AUTH_HEADER` | `Authorization` | Header name when `SOURCE_AUTH_TOKEN` is set |
+| `SOURCE_AUTH_TOKEN` | *(empty)* | Sent verbatim as that header (e.g. `Bearer your-token`) |
+| `SOURCE_ITEMS_PATH` | *(empty)* | Dotted path to the list on the JSON object for `http_json` |
 | `INGESTION_INTERVAL_SECONDS` | `300` | Scheduler period |
 | `SCHEDULER_ENABLED` | `true` | Run ingest on an interval |
 | `HTTP_TIMEOUT_SECONDS` | `30` | Outbound HTTP timeout |

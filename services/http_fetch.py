@@ -6,7 +6,16 @@ from typing import Any
 
 import httpx
 
+from core.config import Settings
 from core.errors import IngestionError
+
+
+def auth_headers(settings: Settings) -> dict[str, str]:
+    """Auth header for outbound source requests; empty token sends no header."""
+    token = settings.source_auth_token.strip()
+    if not token:
+        return {}
+    return {settings.source_auth_header: token}
 
 
 async def fetch_json(
@@ -14,6 +23,7 @@ async def fetch_json(
     url: str,
     timeout_seconds: float,
     client: httpx.AsyncClient | None = None,
+    headers: dict[str, str] | None = None,
 ) -> Any:
     """GET a URL and parse JSON. Raises IngestionError on transport/HTTP/JSON failures."""
 
@@ -21,7 +31,7 @@ async def fetch_json(
     http_client = client or httpx.AsyncClient(timeout=timeout_seconds)
     try:
         try:
-            response = await http_client.get(url)
+            response = await http_client.get(url, headers=headers)
         except httpx.TimeoutException as exc:
             raise IngestionError(
                 "Timed out fetching source",
