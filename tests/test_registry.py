@@ -19,6 +19,7 @@ from services.registry import (
 def test_default_plugins_are_registered() -> None:
     assert "jsonplaceholder" in available_sources()
     assert "http_json" in available_sources()
+    assert "file_json" in available_sources()
     assert available_processors() == ["word_count", "numeric"]
 
 

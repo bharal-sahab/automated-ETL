@@ -34,6 +34,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SOURCE_PAGE_PARAM", "")
     monkeypatch.setenv("SOURCE_MAX_PAGES", "10")
     monkeypatch.setenv("SOURCE_VALUE_FIELD", "")
+    monkeypatch.setenv("SOURCE_FILE", "")
     monkeypatch.setenv("SCHEDULER_ENABLED", "false")
     monkeypatch.setenv("HTTP_TIMEOUT_SECONDS", "5")
     monkeypatch.setenv("SOURCE_AUTH_HEADER", "Authorization")

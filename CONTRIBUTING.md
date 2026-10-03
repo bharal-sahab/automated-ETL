@@ -16,6 +16,8 @@ Dependencies live in [`pyproject.toml`](pyproject.toml). `requirements.txt` list
 
 ## Add a data source
 
+The worked example is [`services/sources/file_json.py`](services/sources/file_json.py), registered as `file_json`. It reads a local JSON array from `SOURCE_FILE` (sample: [`examples/records.json`](examples/records.json)) and does not call HTTP.
+
 1. Create `services/sources/my_source.py` with a class that has `name`, `origin`, and `async def fetch(self) -> list[IngestedItem]`.
 2. Register it in `services/registry.py`:
 
@@ -23,6 +25,7 @@ Dependencies live in [`pyproject.toml`](pyproject.toml). `requirements.txt` list
 SOURCE_FACTORIES = {
     "jsonplaceholder": JsonPlaceholderSource,
     "http_json": HttpJsonSource,
+    "file_json": FileJsonSource,
     "my_source": MySource,
 }
 ```

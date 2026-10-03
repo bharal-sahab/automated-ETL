@@ -12,6 +12,7 @@ from db.models import IngestedItem, ProcessSummary
 from services.contracts import DataSource
 from services.processor import process_posts as process_word_count
 from services.processors.numeric import NumericProcessor
+from services.sources.file_json import FileJsonSource
 from services.sources.http_json import HttpJsonSource
 from services.sources.jsonplaceholder import JsonPlaceholderSource
 
@@ -25,6 +26,7 @@ ProcessorRunner = Callable[
 SOURCE_FACTORIES: dict[str, SourceFactory] = {
     "jsonplaceholder": JsonPlaceholderSource,
     "http_json": HttpJsonSource,
+    "file_json": FileJsonSource,
 }
 
 PROCESSORS: tuple[str, ...] = ("word_count", "numeric")
