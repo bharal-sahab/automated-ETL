@@ -58,6 +58,25 @@ class Settings(BaseSettings):
             "(SOURCE_NAME=http_json). Empty means the root must be an array."
         ),
     )
+    source_next_field: str = Field(
+        default="",
+        description=(
+            "Dotted path to the next page URL on each JSON object response "
+            "(SOURCE_NAME=http_json). Empty disables link-based pagination."
+        ),
+    )
+    source_page_param: str = Field(
+        default="",
+        description=(
+            "Query parameter name for page-number pagination "
+            "(SOURCE_NAME=http_json). Empty disables page-param pagination."
+        ),
+    )
+    source_max_pages: int = Field(
+        default=10,
+        ge=1,
+        description="Maximum pages to fetch when pagination settings are enabled.",
+    )
     source_auth_header: str = Field(
         default="Authorization",
         min_length=1,

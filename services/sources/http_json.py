@@ -7,7 +7,7 @@ from typing import Any
 from core.config import Settings
 from core.errors import PayloadValidationError
 from db.models import IngestedItem
-from services.http_fetch import auth_headers, fetch_json
+from services.sources.pagination import fetch_all_record_rows
 
 
 def dig(obj: dict[str, Any], path: str) -> Any:
@@ -75,44 +75,17 @@ class HttpJsonSource:
         self.text_field = settings.source_text_field
 
     async def fetch(self) -> list[IngestedItem]:
-        payload = await fetch_json(
-            url=self.origin,
-            timeout_seconds=self._settings.http_timeout_seconds,
-            headers=auth_headers(self._settings),
-        )
-        items_path = self._settings.source_items_path.strip()
-        if items_path:
-            if not isinstance(payload, dict):
-                raise PayloadValidationError(
-                    "Source payload must be a JSON object when SOURCE_ITEMS_PATH is set",
-                    details={"received_type": type(payload).__name__, "path": items_path},
-                )
-            try:
-                records = dig(payload, items_path)
-            except PayloadValidationError as exc:
-                raise PayloadValidationError(
-                    "Source payload is missing configured items path",
-                    details={"path": items_path, **(exc.details or {})},
-                ) from exc
-            if not isinstance(records, list):
-                raise PayloadValidationError(
-                    "Configured items path must resolve to a JSON array",
-                    details={"path": items_path, "received_type": type(records).__name__},
-                )
-            payload = records
-        elif not isinstance(payload, list):
-            raise PayloadValidationError(
-                "Source payload must be a JSON array",
-                details={"received_type": type(payload).__name__},
-            )
+        rows = await fetch_all_record_rows(self._settings)
         items: list[IngestedItem] = []
-        for index, row in enumerate(payload):
-            if not isinstance(row, dict):
-                raise PayloadValidationError(
-                    "Each source row must be a JSON object",
-                    details={"index": index, "received_type": type(row).__name__},
-                )
+        seen_ids: set[str] = set()
+        for row in rows:
             item_id = as_item_id(dig(row, self.id_field), path=self.id_field)
+            if item_id in seen_ids:
+                raise PayloadValidationError(
+                    "Duplicate record id across paginated source",
+                    details={"id": item_id},
+                )
+            seen_ids.add(item_id)
             body = as_text(dig(row, self.text_field), path=self.text_field)
             items.append(IngestedItem(id=item_id, body=body, payload=row))
         return items
