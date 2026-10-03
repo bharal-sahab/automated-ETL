@@ -28,7 +28,13 @@ class Settings(BaseSettings):
     )
     processor_name: str = Field(
         default="word_count",
-        description="Registered processor. Built-in: word_count.",
+        description="Registered processor. Built-in: word_count, numeric.",
+    )
+    source_value_field: str = Field(
+        default="",
+        description=(
+            "Object key (dotted path ok) for the numeric value when PROCESSOR_NAME=numeric."
+        ),
     )
     source_url: HttpUrl = Field(
         default="https://jsonplaceholder.typicode.com/posts",

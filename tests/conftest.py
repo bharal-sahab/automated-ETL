@@ -29,6 +29,8 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MOCK_API_URL", "https://jsonplaceholder.typicode.com/posts")
     monkeypatch.setenv("SOURCE_ID_FIELD", "id")
     monkeypatch.setenv("SOURCE_TEXT_FIELD", "body")
+    monkeypatch.setenv("SOURCE_ITEMS_PATH", "")
+    monkeypatch.setenv("SOURCE_VALUE_FIELD", "")
     monkeypatch.setenv("SCHEDULER_ENABLED", "false")
     monkeypatch.setenv("HTTP_TIMEOUT_SECONDS", "5")
     monkeypatch.setenv("SOURCE_AUTH_HEADER", "Authorization")

@@ -19,7 +19,7 @@ from services.registry import (
 def test_default_plugins_are_registered() -> None:
     assert "jsonplaceholder" in available_sources()
     assert "http_json" in available_sources()
-    assert available_processors() == ["word_count"]
+    assert available_processors() == ["word_count", "numeric"]
 
 
 def test_unknown_source_raises(settings: Settings) -> None:
@@ -44,7 +44,7 @@ async def test_register_source_is_used(settings: Settings) -> None:
             pass
 
         async def fetch(self) -> list[IngestedItem]:
-            return [IngestedItem(id=1, body="hello", payload={"id": 1, "body": "hello"})]
+            return [IngestedItem(id="1", body="hello", payload={"id": 1, "body": "hello"})]
 
     register_source("fake", FakeSource)
     try:

@@ -2,22 +2,32 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable, Sequence
+from uuid import UUID
 
 from core.config import Settings
 from core.errors import ConfigurationError
+from db.client import DatabaseClient
+from db.models import IngestedItem, ProcessSummary
 from services.contracts import DataSource
+from services.processor import process_posts as process_word_count
+from services.processors.numeric import NumericProcessor
 from services.sources.http_json import HttpJsonSource
 from services.sources.jsonplaceholder import JsonPlaceholderSource
 
 SourceFactory = Callable[[Settings], DataSource]
+
+ProcessorRunner = Callable[
+    [DatabaseClient, Sequence[IngestedItem], UUID],
+    Awaitable[ProcessSummary],
+]
 
 SOURCE_FACTORIES: dict[str, SourceFactory] = {
     "jsonplaceholder": JsonPlaceholderSource,
     "http_json": HttpJsonSource,
 }
 
-PROCESSORS: tuple[str, ...] = ("word_count",)
+PROCESSORS: tuple[str, ...] = ("word_count", "numeric")
 
 
 def register_source(name: str, factory: SourceFactory) -> None:
@@ -55,3 +65,25 @@ def require_processor(settings: Settings) -> str:
             details={"available": available_processors()},
         )
     return key
+
+
+def get_processor(settings: Settings) -> ProcessorRunner:
+    """Return an async runner ``(db, records, run_id) -> ProcessSummary``."""
+    key = require_processor(settings)
+    if key == "word_count":
+        return process_word_count
+    if key == "numeric":
+        processor = NumericProcessor(settings)
+
+        async def run_numeric(
+            db: DatabaseClient,
+            records: Sequence[IngestedItem],
+            run_id: UUID,
+        ) -> ProcessSummary:
+            return await processor.process(db, records, run_id)
+
+        return run_numeric
+    raise ConfigurationError(
+        f"Unknown PROCESSOR_NAME '{settings.processor_name}'",
+        details={"available": available_processors()},
+    )
