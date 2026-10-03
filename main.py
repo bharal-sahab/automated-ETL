@@ -61,7 +61,7 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="automated-ETL",
         description="Pluggable HTTP JSON ingest → SQLite metrics. Default source: JSONPlaceholder.",
-        version="1.1.0",
+        version="1.2.0",
         lifespan=lifespan,
     )
     register_exception_handlers(application)

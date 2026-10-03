@@ -20,7 +20,7 @@ def _orchestrator(request: Request) -> PipelineOrchestrator:
 async def root() -> RootResponse:
     return RootResponse(
         name="automated-ETL",
-        version="1.1.0",
+        version="1.2.0",
         sources=available_sources(),
         processors=available_processors(),
     )

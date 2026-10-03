@@ -162,7 +162,7 @@ You still set `SOURCE_TEXT_FIELD` for `http_json` if the payload has a text colu
 
 Then `POST /pipeline/run`. Scheduler: `SCHEDULER_ENABLED=true`, `INGESTION_INTERVAL_SECONDS=300`.
 
-**Template repo:** To offer “Use this template” on GitHub, mark the repository as a template in **Settings → General**. Add topics such as `fastapi`, `etl`, `sqlite`, and `python` under **About** (repo owner, in the UI).
+**Template repo:** On GitHub, open **Settings → General → Template repository** and check **Template repository**. Under **About**, add topics `fastapi`, `etl`, `sqlite`, and `python`. That shows **Use this template** on the repo home page. The app version for this release is `1.2.0`.
 
 ## Extend it in code
 

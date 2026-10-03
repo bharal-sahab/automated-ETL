@@ -47,8 +47,10 @@ def test_root_lists_plugins(client: TestClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["name"] == "automated-ETL"
+    assert body["version"] == "1.2.0"
     assert "jsonplaceholder" in body["sources"]
     assert "http_json" in body["sources"]
+    assert "file_json" in body["sources"]
     assert "word_count" in body["processors"]
     assert body["docs"] == "/docs"
 
